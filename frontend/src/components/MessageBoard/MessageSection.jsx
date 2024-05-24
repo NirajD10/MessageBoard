@@ -1,5 +1,5 @@
 import { Presentation } from "@phosphor-icons/react";
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import TextArea from "./TextArea";
 import MessagesItem from "./MessagesItem";
 import { ModalContext } from "../../context/modal-context";
@@ -57,7 +57,7 @@ function MessageSection({ detail, your_role }) {
       {modalContext.leaveboardModal && <ModalLeaveMessageBoard />}
       {/* Messages */}
       {hasDataAuthor ? (
-        <div className="flex grow flex-col-reverse ">
+        <div className="flex grow flex-col-reverse h-screen overflow-auto">
           <div className="flex flex-col px-4 gap-2">
             {detail[0].message_detail?.map((mitem) => (
               <MessagesItem key={mitem._id} message_detail={mitem} />

@@ -282,7 +282,6 @@ exports.sendInvitation = async (req, res, next) => {
   const { board_id } = req.params;
   const user_id = req.user_id;
   const { receipt_email } = req.body;
-  console.log(receipt_email);
 
   const formatted_receipt_email = receipt_email.email.toString().toLowerCase();
 
@@ -366,6 +365,49 @@ exports.sendInvitation = async (req, res, next) => {
         throw error;
       }
     }
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.promoteUser = async (req, res, next) => {
+  const user_id = req.user_id;
+  const { promote_subscriber_id, board_id } = req.params;
+  const { roles } = req.body;
+  const roletype = ["viewer", "editor"];
+
+  console.log(board_id)
+  console.log(promote_subscriber_id)
+
+  try {
+    if (!roles) {
+      const error = new Error("Choose Roles one");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    if (roletype.includes(roles) === false) {
+      const error = new Error("Roles should be only Viewer or Editor");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const changeRole = await MessageBoard.findOneAndUpdate(
+      { _id: board_id, "subscribers.user": promote_subscriber_id },
+      { $set: { "subscribers.$.role": roles } },
+      { new: true }
+    );
+
+    if (!changeRole) {
+      const error = new Error("Message Board or Subscriber could not found");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    res.status(200).json({ message: "Updated." });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

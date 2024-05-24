@@ -5,17 +5,12 @@ import { MessageBoardContext } from "./messageboard-context";
 export const InvitationContext = createContext();
 
 function InvitationProvider({ children }) {
-  const messageboardContext = useContext(MessageBoardContext);  
-
   const [notificationlist, setNotificationlist] = useState();
-  const [refreshquery, setRefreshquery] = useState();
-  const token = sessionStorage.getItem("token");
-
-  // useEffect(() => {
-  //   getNotificationInvitationList();
-  // }, [refreshquery]);
+  const messageboardCtx = useContext(MessageBoardContext);
 
   function getNotificationInvitationList() {
+    const token = sessionStorage.getItem("token");
+
     if (!token) {
       toast.error("Token Missing. Couldn't process it.");
     }
@@ -27,9 +22,13 @@ function InvitationProvider({ children }) {
         Authorization: "Bearer " + token,
       },
     })
-      .then((response) => response.json())
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
         if (resData.status === 500 || resData.status === 401) {
+          throw new Error(resData.message);
+        } else if (resData.status === 422) {
           throw new Error(resData.message);
         } else {
           setNotificationlist(resData);
@@ -39,26 +38,35 @@ function InvitationProvider({ children }) {
   }
 
   function postInvitationRespond(response, invitation_id) {
+    const token = sessionStorage.getItem("token");
+
     if (!token) {
       toast.error("Token Missing. Couldn't process it.");
     }
 
-    fetch(`${import.meta.env.VITE_BACKEND_URL}invitations/${invitation_id}/respond`, {
-      method: "POST",
-      body: JSON.stringify({invitation_response: response}),
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    })
-      .then((response) => response.json())
+    fetch(
+      `${import.meta.env.VITE_BACKEND_URL}invitations/${invitation_id}/respond`,
+      {
+        method: "POST",
+        body: JSON.stringify({ invitation_response: response }),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
         if (resData.status === 500 || resData.status === 401) {
           throw new Error(resData.message);
+        } else if (resData.status === 422) {
+          throw new Error(resData.message);
         } else {
-          setRefreshquery(true);
           toast.success(resData.message);
-          messageboardContext.getMessageBoardList()
+          getNotificationInvitationList();
+          messageboardCtx.getMessageBoardList();
         }
       })
       .catch((error) => toast.error(error.message));
@@ -66,7 +74,11 @@ function InvitationProvider({ children }) {
 
   return (
     <InvitationContext.Provider
-      value={{ notificationlist, refreshquery, postInvitationRespond, getNotificationInvitationList }}
+      value={{
+        notificationlist,
+        postInvitationRespond,
+        getNotificationInvitationList,
+      }}
     >
       {children}
     </InvitationContext.Provider>

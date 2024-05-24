@@ -7,6 +7,7 @@ function ModalProvider({ children }) {
   const [inviteModal, setInviteModal] = useState(false);
   const [leaveboardModal, setLeaveboardModal] = useState(false);
   const [deletepostModal, setDeletepostModal] = useState(false);
+  const [promoteUserModal, setPromoteUserModal] = useState(false);
 
   const closeModal = (mode) => {
     switch (mode) {
@@ -21,6 +22,9 @@ function ModalProvider({ children }) {
         break;
       case "delete-post":
         setDeletepostModal(false);
+        break;
+      case "promote-roles":
+        setPromoteUserModal(false);
         break;
     }
   };
@@ -39,8 +43,10 @@ function ModalProvider({ children }) {
       case "delete-post":
         setDeletepostModal(true);
         break;
+      case "promote-roles":
+        setPromoteUserModal(true);
+        break;
     }
-    // setOpen(true);
   };
 
   return (
@@ -50,6 +56,7 @@ function ModalProvider({ children }) {
         inviteModal,
         deletepostModal,
         leaveboardModal,
+        promoteUserModal,
         closeModal,
         openModal,
       }}

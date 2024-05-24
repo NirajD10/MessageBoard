@@ -15,10 +15,6 @@ function TextArea() {
     formState: { errors },
   } = useForm();
 
-  // useEffect(() => {
-  //   messageBoardContext.getMessageBoardList(board_id);
-  // }, [messageBoardContext.messageboarddetail]);
-
   function onSubmit(data) {
     messageContext.postMessage(data, board_id);
     messageBoardContext.getMessageBoardDetail(board_id);
@@ -40,7 +36,7 @@ function TextArea() {
         <div className="flex items-center justify-end gap-2 bg-white p-3">
           <button
             type="submit"
-            className="rounded bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-primaryColor"
+            className="rounded bg-primaryColor px-3 py-1.5 text-sm font-medium text-white hover:bg-primaryColor"
           >
             Submit
           </button>

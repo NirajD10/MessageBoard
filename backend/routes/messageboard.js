@@ -10,7 +10,11 @@ router.get("/", isauthenticate, messageboardController.getMessageBoardList);
 
 router.get("/:board_id", isauthenticate, messageboardController.getMessageBoardDetail);
 
+/* POST for create new board */
 router.post("/", isauthenticate,  messageboardController.createMessageBoard);
+
+/* Promote user */
+router.put("/:board_id/subscribers/:promote_subscriber_id", messageboardController.promoteUser);
 
 /* Send Invitation in Single MessageBoard */
 router.post("/:board_id/invite", isauthenticate, messageboardController.sendInvitation);

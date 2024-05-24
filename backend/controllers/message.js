@@ -6,8 +6,6 @@ exports.postMessage = async (req, res, next) => {
   const user_id = req.user_id;
   const { boardid } = req.params;
 
-  console.log(user_id);
-
   try {
     /* verify messageboard that meet 'boardid' params */
     const messageboard = await MessageBoard.findById(boardid);
@@ -62,8 +60,8 @@ exports.postMessage = async (req, res, next) => {
       }
 
       await postmessageHandler();
-      res.status(200).json({ message: "Message Sent." });
     }
+    res.status(200).json({ message: "Message Sent." });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -104,11 +102,9 @@ exports.deleteMessage = async (req, res, next) => {
       messageboard.messages.pull(message_id);
       messageboard.save();
 
-      const deleted_result = await Message.findByIdAndDelete(message_id);
-      if (deleted_result) {
-        res.status(200).json({ message: "Deleted." });
-      }
+      await Message.findByIdAndDelete(message_id);
     }
+    res.status(200).json({ message: "Deleted."});
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -168,8 +164,8 @@ exports.editMessage = async (req, res, next) => {
       }
 
       await editMessageHandler();
-      res.status(200).json({ message: "Message edited." });
     }
+    res.status(200).json({ message: "Message edited." });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

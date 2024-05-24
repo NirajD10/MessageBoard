@@ -9,29 +9,31 @@ function MessageProvider({ children }) {
   const messageboardContext = useContext(MessageBoardContext);
 
   function postMessage(data, messageboard_id) {
-
     if (!token) {
       toast.error("Token Missing. Couldn't process it");
       return;
     }
-    console.log("Fetch method called.")
-    fetch(`${import.meta.env.VITE_BACKEND_URL}boards/${messageboard_id}/messages`, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    })
-      .then((response) => response.json())
+
+    fetch(
+      `${import.meta.env.VITE_BACKEND_URL}boards/${messageboard_id}/messages`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
-        console.log("Fetch method resData called.", resData)
         if (resData.status === 500 || resData.status === 401) {
           throw new Error(resData.message);
         } else if (resData.status === 422) {
           throw new Error(resData.message);
         } else {
-          console.log("Fetch method resData Sucessful called.")
           toast.success(resData.message, { duration: 3000 });
           messageboardContext.getMessageBoardDetail(messageboard_id);
         }
@@ -41,20 +43,27 @@ function MessageProvider({ children }) {
       });
   }
 
-  function deleteMessage(messageboard_id, message_id){
+  function deleteMessage(messageboard_id, message_id) {
     if (!token) {
       toast.error("Token Missing. Couldn't process it");
       return;
     }
 
-    fetch(`${import.meta.env.VITE_BACKEND_URL}boards/${messageboard_id}/messages/${message_id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    })
-      .then((response) => response.json())
+    fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }boards/${messageboard_id}/messages/${message_id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
         if (resData.status === 500 || resData.status === 401) {
           throw new Error(resData.message);
@@ -62,8 +71,7 @@ function MessageProvider({ children }) {
           throw new Error(resData.message);
         } else {
           toast.success(resData.message, { duration: 3000 });
-          messageboardContext.getMessageBoardDetail(messageboard_id) 
-          // window.location.href = `/${messageboard_id}` 
+          messageboardContext.getMessageBoardDetail(messageboard_id);
         }
       })
       .catch((error) => {
@@ -76,33 +84,43 @@ function MessageProvider({ children }) {
       toast.error("Token Missing. Couldn't process it");
       return;
     }
-    console.log("Fetch method called.")
-    fetch(`${import.meta.env.VITE_BACKEND_URL}boards/${messageboard_id}/messages/${message_id}`, {
-      method: "PUT",
-      body: JSON.stringify(new_content),
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    })
-      .then((response) => response.json())
+    fetch(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }boards/${messageboard_id}/messages/${message_id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(new_content),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
-        console.log("Fetch method resData called.", resData)
         if (resData.status === 500 || resData.status === 401) {
           throw new Error(resData.message);
         } else if (resData.status === 422) {
           throw new Error(resData.message);
-        } else if (resData.status === 200){
-          console.log("Fetch method resData Sucessful called.")
+        } else {
           toast.success(resData.message, { duration: 3000 });
-          messageboardContext.getMessageBoardDetail(messageboard_id) 
+          messageboardContext.getMessageBoardDetail(messageboard_id);
         }
       })
       .catch((error) => {
         toast.error(error.message);
       });
   }
-  return <MessageContext.Provider value={{postMessage, deleteMessage, editMessage}}>{children}</MessageContext.Provider>;
+  return (
+    <MessageContext.Provider
+      value={{ postMessage, deleteMessage, editMessage }}
+    >
+      {children}
+    </MessageContext.Provider>
+  );
 }
 
 export default MessageProvider;

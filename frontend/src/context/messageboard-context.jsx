@@ -11,20 +11,47 @@ function MessageBoardProvider({ children }) {
   const [errorInvitation, setErrorInvitation] = useState(null);
 
   /* State for message board list */
-  const [refreshquery, setRefreshquery] = useState();
   const [messageboardlists, setMessageboardlists] = useState();
 
   /* State for single message board detail */
   const [yourrole, setYourRole] = useState();
-  const [refreshmbdetailquery, setRefreshmbdetailquery] = useState(false);
   const [messageboarddetail, setmessageboarddetail] = useState(null);
 
   const token = sessionStorage.getItem("token");
 
-  // /* call api for message board list when effect came */
-  // useEffect(() => {
-  //   getMessageBoardList();
-  // }, [refreshquery]);
+  const updateUserRoles = (board_id, subsriber_id, data) => {
+    if (!token) {
+      toast.error("Token Missing. Couldn't process it");
+      return;
+    }
+
+    fetch(`${import.meta.env.VITE_BACKEND_URL}boards/${board_id}/subscribers/${subsriber_id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((resData) => {
+        if (resData.status === 500 || resData.status === 401) {
+          throw new Error(resData.message);
+        } else if (resData.status === 422) {
+          throw new Error(resData.message);
+        } else {
+          toast.success(resData.message, { duration: 3000 });
+          getMessageBoardDetail(board_id);
+          modalContext.closeModal("promote-user");
+        }
+      })
+      .catch((error) => {
+        toast.error(error.message);
+      });
+  }
+
 
   /* To leave Message Board API Call */
   const leaveMessagegroup = (board_id) => {
@@ -40,7 +67,9 @@ function MessageBoardProvider({ children }) {
         Authorization: "Bearer " + token,
       },
     })
-      .then((response) => response.json())
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
         if (resData.status === 500 || resData.status === 401) {
           throw new Error(resData.message);
@@ -49,11 +78,10 @@ function MessageBoardProvider({ children }) {
         } else {
           toast.success(resData.message, { duration: 3000 });
           getMessageBoardList();
-          getMessageBoardDetail(board_id);
           modalContext.closeModal("leave-board");
           setTimeout(() => {
-            window.location.href = "/"
-          },1000)
+            window.location.href = "/";
+          }, 1000);
         }
       })
       .catch((error) => {
@@ -76,13 +104,16 @@ function MessageBoardProvider({ children }) {
         Authorization: "Bearer " + token,
       },
     })
-      .then((response) => response.json())
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
         if (resData.status === 500 || resData.status === 401) {
           throw new Error(resData.message);
         } else if (resData.status === 422) {
           throw new Error(resData.message);
         } else {
+          console.log(resData);
           toast.success(resData.message, { duration: 3000 });
           getMessageBoardList();
           getMessageBoardDetail(data.id);
@@ -109,7 +140,9 @@ function MessageBoardProvider({ children }) {
         Authorization: "Bearer " + token,
       },
     })
-      .then((response) => response.json)
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
         if (resData.status === 500 || resData.status === 401) {
           throw new Error(resData.message);
@@ -117,7 +150,6 @@ function MessageBoardProvider({ children }) {
           throw new Error(resData.message);
         } else {
           toast.success(resData.message, { duration: 3000 });
-          setRefreshquery(true);
           getMessageBoardList();
           modalContext.closeModal("create-board");
         }
@@ -146,11 +178,13 @@ function MessageBoardProvider({ children }) {
         },
       }
     )
-      .then((response) => response.json())
+      .then((response) => {
+        return response.json();
+      })
       .then((resData) => {
-        if (resData.status === 500) {
+        if (resData.status === 500 || resData.status === 401) {
           throw new Error(resData.message);
-        } else if (resData.status === 401) {
+        } else if (resData.status === 422) {
           throw new Error(resData.message);
         } else {
           if (mode === "list") {
@@ -158,7 +192,6 @@ function MessageBoardProvider({ children }) {
           } else {
             setmessageboarddetail(resData.detail);
             setYourRole(resData.your_role);
-            // setRefreshmbdetailquery(true);
           }
         }
       })
@@ -183,16 +216,13 @@ function MessageBoardProvider({ children }) {
         yourrole,
         messageboardlists,
         messageboarddetail,
-        refreshquery,
-        refreshmbdetailquery,
         errorInvitation,
-        setRefreshquery,
         postMessageBoardTitle,
         getMessageBoardList,
         getMessageBoardDetail,
-        setmessageboarddetail,
         postInvitationMember,
         leaveMessagegroup,
+        updateUserRoles
       }}
     >
       {children}
